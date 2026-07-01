@@ -81,6 +81,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Use permalink for doc/UsersGuide/source/requirements.txt to keep builds
 # deterministic.
 RUN pip install --no-cache-dir \
+    fmpy \
     junit_xml \
     lxml \
     ompython==3.6.0 \
@@ -177,6 +178,7 @@ ARG COMMON_PKGS="\
     git \
     gnuplot-nox \
     inkscape \
+    jq \
     latexmk \
     libcurl4-gnutls-dev \
     libmldbm-perl \

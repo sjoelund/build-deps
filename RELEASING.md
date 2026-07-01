@@ -13,11 +13,11 @@ Releases are driven entirely by **git tags**; you never push images by hand.
 <os>-<os-version>-<semver>
 ```
 
-| Part | Example | Notes |
-| --- | --- | --- |
-| `<os>` | `ubuntu` | A directory at the repo root holding `<os>/Dockerfile`. |
-| `<os-version>` | `24.04`, `13`, `rolling` | Selects the version (a build-arg) within that OS. |
-| `<semver>` | `2.1.0` | **This repository's** version (the recipe), independent of OpenModelica. `MAJOR.MINOR.PATCH`. |
+| Part           | Example                  | Notes                                                                                         |
+| -------------- | ------------------------ | --------------------------------------------------------------------------------------------- |
+| `<os>`         | `ubuntu`                 | A directory at the repo root holding `<os>/Dockerfile`.                                       |
+| `<os-version>` | `24.04`, `13`, `rolling` | Selects the version (a build-arg) within that OS.                                             |
+| `<semver>`     | `2.1.0`                  | **This repository's** version (the recipe), independent of OpenModelica. `MAJOR.MINOR.PATCH`. |
 
 The pair `<os>-<os-version>` must match an entry in
 [.ci/matrix.yml][ci-matrix] (you can list valid prefixes with

@@ -38,7 +38,6 @@ images:
       VERSION: "26.04"
     addons:
       - rust
-      - cmake-4
       - debug
 
   - os: ubuntu

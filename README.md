@@ -36,7 +36,7 @@ main
   OpenModelica (distro packages + common tooling: TeX, Qt, Python venv,
   ccache, …). This is what most CI jobs use.
 - **Add-on image** — the base plus *one* thing the distro package manager can't
-  provide or that needs a pinned version (e.g. CMake 4). Realised as an extra
+  provide or that needs a pinned version (e.g. CMake 4). Realized as an extra
   build **stage** (`FROM` the base stage) in the same Dockerfile, so shared
   layers are reused from cache.
 
@@ -71,15 +71,15 @@ OpenModelica release needs a frozen environment it pins the **immutable** tag.
 
 ### Currently provided images
 
-| OS / version             | Base tag               | Add-ons                    | Dockerfile           | Status      |
-| ------------------------ | ---------------------- | -------------------------- | -------------------- | ----------- |
-| Ubuntu 26.04 (Resolute)  | `ubuntu-26.04`         | `rust`, `cmake-4`, `debug` | `apt/Dockerfile`     | implemented |
-| Ubuntu 24.04 (Noble)     | `ubuntu-24.04`         | `cmake-4`, `debug`         | `apt/Dockerfile`     | implemented |
-| Ubuntu 22.04 (Jammy)     | `ubuntu-22.04`         | `debug`                    | `apt/Dockerfile`     | implemented |
-| Debian 13 (Trixie)       | `debian-13`            | `cmake-4`, `debug`         | `apt/Dockerfile`     | implemented |
-| Debian 12 (Bookworm)     | `debian-12`            | `cmake-4`, `debug`         | `apt/Dockerfile`     | implemented |
-| Fedora, AlmaLinux, RHEL  | `<os>-<ver>`           | –                          | `rpm/Dockerfile`     | planned     |
-| Arch Linux (rolling)     | `arch-rolling`         | –                          | `pacman/Dockerfile`  | placeholder |
+| OS / version            | Base tag       | Add-ons            | Dockerfile          | Status      |
+| ----------------------- | -------------- | ------------------ | ------------------- | ----------- |
+| Ubuntu 26.04 (Resolute) | `ubuntu-26.04` | `rust`, `debug`    | `apt/Dockerfile`    | implemented |
+| Ubuntu 24.04 (Noble)    | `ubuntu-24.04` | `cmake-4`, `debug` | `apt/Dockerfile`    | implemented |
+| Ubuntu 22.04 (Jammy)    | `ubuntu-22.04` | `debug`            | `apt/Dockerfile`    | implemented |
+| Debian 13 (Trixie)      | `debian-13`    | `cmake-4`, `debug` | `apt/Dockerfile`    | implemented |
+| Debian 12 (Bookworm)    | `debian-12`    | `cmake-4`, `debug` | `apt/Dockerfile`    | implemented |
+| Fedora, AlmaLinux, RHEL | `<os>-<ver>`   | –                  | `rpm/Dockerfile`    | planned     |
+| Arch Linux (rolling)    | `arch-rolling` | –                  | `pacman/Dockerfile` | placeholder |
 
 ## Build locally
 
