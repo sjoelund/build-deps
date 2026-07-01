@@ -168,6 +168,7 @@ ARG COMMON_PKGS="\
     bibtex2html \
     bison \
     ccache \
+    clang \
     clang-tools \
     devscripts \
     docker.io \
@@ -180,6 +181,8 @@ ARG COMMON_PKGS="\
     latexmk \
     libcurl4-gnutls-dev \
     libmldbm-perl \
+    llvm \
+    llvm-dev \
     locales \
     ocl-icd-opencl-dev \
     opencl-headers \
