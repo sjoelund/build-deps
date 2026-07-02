@@ -168,7 +168,6 @@ ARG COMMON_PKGS="\
     bibtex2html \
     bison \
     ccache \
-    clang \
     clang-tools \
     devscripts \
     docker.io \
