@@ -122,7 +122,8 @@ RUN curl https://sh.rustup.rs | bash -s -- -y \
       --default-toolchain "${RUST_NIGHTLY}" \
       --target x86_64-pc-windows-msvc \
       --target aarch64-pc-windows-msvc \
-      --target wasm32-unknown-unknown && \
+      --target wasm32-unknown-unknown \
+      --target wasm32-wasip1 && \
     . "$CARGO_HOME/env" && \
     which cargo && cargo --version && \
     rustup component add rustc-codegen-cranelift-preview clippy rustfmt && \
@@ -133,6 +134,7 @@ RUN curl https://sh.rustup.rs | bash -s -- -y \
     echo "${BINARYEN_SHA256}  /tmp/binaryen.tar.gz" | sha256sum -c - && \
     tar -xzf /tmp/binaryen.tar.gz -C /tmp && \
     install -m755 "/tmp/binaryen-${BINARYEN_VERSION}/bin/wasm-opt" "$CARGO_HOME/bin/wasm-opt" && \
+    install -m755 "/tmp/binaryen-${BINARYEN_VERSION}/bin/wasm-merge" "$CARGO_HOME/bin/wasm-merge" && \
     rm -rf /tmp/binaryen.tar.gz "/tmp/binaryen-${BINARYEN_VERSION}" && \
     cargo install --locked cargo-xwin && \
     cargo xwin cache xwin \
