@@ -69,6 +69,12 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
+# CI mounts fresh named volumes under /cache; Docker seeds an empty volume with
+# the mount point's image permissions, so create them world-writable for the
+# non-root Jenkins uid (emscripten/sccache/runtest/omlibrary caches).
+RUN mkdir -p /cache/emscripten /cache/sccache /cache/runtest /cache/omlibrary \
+  && chmod -R 0777 /cache
+
 # ── venv: Python tooling, isolated so it caches independently ─────────────────
 # Built once and copied into `full`. Uses the same python3 as `full` (same
 # base image), so the relocated /opt/venv works there unchanged.
