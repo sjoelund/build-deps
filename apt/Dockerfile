@@ -107,6 +107,10 @@ RUN apt-get update \
 # Specific versions needed for caching Rust crates
 ARG WASM_BINDGEN_VERSION="0.2.125"
 ARG RUST_NIGHTLY="nightly-2026-05-31"
+# Upstream binaryen: the crates.io wasm-opt is stuck at binaryen 116 and Ubuntu's
+# apt build is 120; wasm-bindgen is newer and emits newer opcodes.
+ARG BINARYEN_VERSION="version_130"
+ARG BINARYEN_SHA256="0a18362361ad05465118cd8eeb72edaeec89de6894bc283576ef4e07aa3babcc"
 
 ENV RUSTUP_HOME=/opt/rust/rustup \
   CARGO_HOME=/opt/rust/cargo \
@@ -125,7 +129,11 @@ RUN curl https://sh.rustup.rs | bash -s -- -y \
     cargo install wasm-bindgen-cli --version "${WASM_BINDGEN_VERSION}" && \
     cargo install sccache --locked && \
     cargo install cargo-nextest --locked && \
-    cargo install wasm-opt && \
+    curl -sSfL "https://github.com/WebAssembly/binaryen/releases/download/${BINARYEN_VERSION}/binaryen-${BINARYEN_VERSION}-x86_64-linux.tar.gz" -o /tmp/binaryen.tar.gz && \
+    echo "${BINARYEN_SHA256}  /tmp/binaryen.tar.gz" | sha256sum -c - && \
+    tar -xzf /tmp/binaryen.tar.gz -C /tmp && \
+    install -m755 "/tmp/binaryen-${BINARYEN_VERSION}/bin/wasm-opt" "$CARGO_HOME/bin/wasm-opt" && \
+    rm -rf /tmp/binaryen.tar.gz "/tmp/binaryen-${BINARYEN_VERSION}" && \
     cargo install --locked cargo-xwin && \
     cargo xwin cache xwin \
       --xwin-arch x86_64,aarch64 && \
@@ -301,7 +309,7 @@ FROM full AS rust
 LABEL org.opencontainers.image.description="OpenModelica build-deps (Ubuntu) for the Rust targets"
 
 ENV EMSDK=/opt/emsdk \
-  QT_HOST_PATH=/opt/Qt/6.10.2/linux_gcc_64 \
+  QT_HOST_PATH=/opt/Qt/6.10.2/gcc_64 \
   RUSTUP_HOME=/opt/rust/rustup \
   CARGO_HOME=/opt/rust/cargo \
   XWIN_CACHE_DIR=/opt/cargo-xwin \
