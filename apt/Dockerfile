@@ -323,6 +323,9 @@ COPY --from=rustdeps /opt/rust /opt/rust
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update \
   && apt-get install -qy \
+    lld \
+    wasi-libc \
+    libclang-rt-dev-wasm32 \
     wine \
     mold \
   && apt-get clean \
