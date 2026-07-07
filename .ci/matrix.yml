@@ -39,6 +39,7 @@ images:
     addons:
       - rust
       - debug
+      - omsimulator
 
   - os: ubuntu
     version: "24.04"
@@ -51,6 +52,7 @@ images:
     addons:
       - cmake-4
       - debug
+      - omsimulator
 
   - os: ubuntu
     version: "22.04"
@@ -62,6 +64,7 @@ images:
       VERSION: "22.04"
     addons:
       - debug
+      - omsimulator
 
   - os: debian
     version: "13"

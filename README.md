@@ -71,15 +71,15 @@ OpenModelica release needs a frozen environment it pins the **immutable** tag.
 
 ### Currently provided images
 
-| OS / version            | Base tag       | Add-ons            | Dockerfile          | Status      |
-| ----------------------- | -------------- | ------------------ | ------------------- | ----------- |
-| Ubuntu 26.04 (Resolute) | `ubuntu-26.04` | `rust`, `debug`    | `apt/Dockerfile`    | implemented |
-| Ubuntu 24.04 (Noble)    | `ubuntu-24.04` | `cmake-4`, `debug` | `apt/Dockerfile`    | implemented |
-| Ubuntu 22.04 (Jammy)    | `ubuntu-22.04` | `debug`            | `apt/Dockerfile`    | implemented |
-| Debian 13 (Trixie)      | `debian-13`    | `cmake-4`, `debug` | `apt/Dockerfile`    | implemented |
-| Debian 12 (Bookworm)    | `debian-12`    | `cmake-4`, `debug` | `apt/Dockerfile`    | implemented |
-| Fedora, AlmaLinux, RHEL | `<os>-<ver>`   | –                  | `rpm/Dockerfile`    | planned     |
-| Arch Linux (rolling)    | `arch-rolling` | –                  | `pacman/Dockerfile` | placeholder |
+| OS / version            | Base tag       | Add-ons                           | Dockerfile          | Status      |
+| ----------------------- | -------------- | --------------------------------- | ------------------- | ----------- |
+| Ubuntu 26.04 (Resolute) | `ubuntu-26.04` | `rust`, `debug`, `omsimulator`    | `apt/Dockerfile`    | implemented |
+| Ubuntu 24.04 (Noble)    | `ubuntu-24.04` | `cmake-4`, `debug`, `omsimulator` | `apt/Dockerfile`    | implemented |
+| Ubuntu 22.04 (Jammy)    | `ubuntu-22.04` | `debug`, `omsimulator`            | `apt/Dockerfile`    | implemented |
+| Debian 13 (Trixie)      | `debian-13`    | `cmake-4`, `debug`                | `apt/Dockerfile`    | implemented |
+| Debian 12 (Bookworm)    | `debian-12`    | `cmake-4`, `debug`                | `apt/Dockerfile`    | implemented |
+| Fedora, AlmaLinux, RHEL | `<os>-<ver>`   | –                                 | `rpm/Dockerfile`    | planned     |
+| Arch Linux (rolling)    | `arch-rolling` | –                                 | `pacman/Dockerfile` | placeholder |
 
 ## Build locally
 

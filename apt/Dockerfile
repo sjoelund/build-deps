@@ -11,6 +11,7 @@
 #   cmake-4  ADD-ON: full + CMake 4 from the official Kitware release
 #   debug    ADD-ON: full + GDB, Valgrind, and other debugging tools
 #   rust     ADD-ON: full + Rust toolchain + Emscripten + Qt for Wasm (Ubuntu only)
+#   omsimulator ADD-ON: full + X11 dev libs for the OMSimulator build
 #
 # Build the base image (the `full` target):
 #   docker build --target full --build-arg DISTRO=ubuntu --build-arg VERSION=26.04 \
@@ -330,5 +331,21 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update \
     libclang-rt-dev-wasm32 \
     wine \
     mold \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# ── OMSimulator add-on: full + X11 dev libs OMSimulator's GUI links against ───
+# Mirrors OMSimulator/.CI/cache/Dockerfile. The AddressSanitizer runtime is not
+# installed explicitly; the gcc/g++ toolchain pulls in its matching libasan when
+# building with -fsanitize=address. Built with `--target omsimulator`.
+FROM full AS omsimulator
+LABEL org.opencontainers.image.description="OMSimulator build-deps"
+RUN export DEBIAN_FRONTEND=noninteractive && \
+  apt-get update \
+  && apt-get install -qy \
+    libxcursor-dev \
+    libxi-dev \
+    libxinerama-dev \
+    libxrandr-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
