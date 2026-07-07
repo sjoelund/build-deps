@@ -198,6 +198,8 @@ ARG COMMON_PKGS="\
     latexmk \
     libcurl4-gnutls-dev \
     libmldbm-perl \
+    llvm \
+    llvm-dev \
     locales \
     ocl-icd-opencl-dev \
     opencl-headers \
