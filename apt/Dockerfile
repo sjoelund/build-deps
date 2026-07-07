@@ -194,6 +194,7 @@ ARG COMMON_PKGS="\
     flex \
     git \
     gnuplot-nox \
+    graphviz \
     inkscape \
     jq \
     latexmk \
