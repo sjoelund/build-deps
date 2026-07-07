@@ -87,7 +87,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Use permalink for doc/UsersGuide/source/requirements.txt to keep builds
 # deterministic.
 RUN pip install --no-cache-dir \
-    fmpy \
+    fmpy==0.3.29 \
     junit_xml \
     lxml \
     ompython==3.6.0 \

@@ -104,12 +104,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v7
 
-      # The rust add-on image is huge (Rust toolchains, xwin Windows SDK,
-      # Emscripten, three Qt installs) and overflows the runner's root disk
-      # during `docker buildx ... --load`. Reclaim ~20 GB of pre-installed
-      # bloat first. Only the rust-bearing image needs it.
+      # The Dockerfile tend to be huge, free up some space on the GitHub runners
       - name: Free up disk space
-        if: contains(matrix.image.addons, 'rust')
         uses: endersonmenezes/free-disk-space@v3.2.2
         with:
           remove_android: "true"
@@ -184,10 +180,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v7
 
-      # Only ubuntu-26.04 carries the rust add-on, which overflows the
-      # runner's root disk during build+push. Reclaim ~20 GB first.
+      # The Dockerfile tend to be huge, free up some space on the GitHub runners
       - name: Free up disk space
-        if: contains(matrix.image.tag, 'ubuntu-26.04')
         uses: endersonmenezes/free-disk-space@v3.2.2
         with:
           remove_android: "true"
@@ -262,10 +256,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v7
 
-      # Only ubuntu-26.04 carries the rust add-on, which overflows the
-      # runner's root disk during build+push. Reclaim ~20 GB first.
+      # The Dockerfile tend to be huge, free up some space on the GitHub runners
       - name: Free up disk space
-        if: contains(matrix.image.tag, 'ubuntu-26.04')
         uses: endersonmenezes/free-disk-space@v3.2.2
         with:
           remove_android: "true"
