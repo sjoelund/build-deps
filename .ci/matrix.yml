@@ -91,6 +91,18 @@ images:
       - cmake-4
       - debug
 
+  # Alpine has no OpenModelica apk repo; apk/Dockerfile installs the build
+  # dependencies directly. VERSION selects the Alpine release.
+  - os: alpine
+    version: "3.22"
+    context: apk
+    dockerfile: apk/Dockerfile
+    target: full
+    build_args:
+      VERSION: "3.22"
+    addons:
+      - omsimulator
+
   # Placeholders — not implemented yet. Uncomment and flesh out once the
   # corresponding Dockerfile is real, so CI starts building them.
   #
