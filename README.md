@@ -80,7 +80,7 @@ OpenModelica release needs a frozen environment it pins the **immutable** tag.
 | Ubuntu 22.04 (Jammy)    | `ubuntu-22.04` | `debug`, `omsimulator`            | `apt/Dockerfile`    | implemented |
 | Debian 13 (Trixie)      | `debian-13`    | `cmake-4`, `debug`                | `apt/Dockerfile`    | implemented |
 | Debian 12 (Bookworm)    | `debian-12`    | `cmake-4`, `debug`                | `apt/Dockerfile`    | implemented |
-| Alpine 3.22             | `alpine-3.22`  | `omsimulator`                     | `apk/Dockerfile`    | implemented |
+| Alpine 3.24             | `alpine-3.24`  | `omsimulator`                     | `apk/Dockerfile`    | implemented |
 | Fedora, AlmaLinux, RHEL | `<os>-<ver>`   | –                                 | `rpm/Dockerfile`    | planned     |
 | Arch Linux (rolling)    | `arch-rolling` | –                                 | `pacman/Dockerfile` | placeholder |
 
@@ -123,15 +123,15 @@ only build-arg is `VERSION` (the Alpine release):
 # Base image (the `full` stage)
 docker build --pull --no-cache \
   --target full \
-  --build-arg VERSION=3.22 \
-  --tag build-deps:alpine-3.22 \
+  --build-arg VERSION=3.24 \
+  --tag build-deps:alpine-3.24 \
   apk
 
 # OMSimulator add-on (reuses the base's cached layers)
 docker build --pull \
   --target omsimulator \
-  --build-arg VERSION=3.22 \
-  --tag build-deps:alpine-3.22-omsimulator \
+  --build-arg VERSION=3.24 \
+  --tag build-deps:alpine-3.24-omsimulator \
   apk
 ```
 

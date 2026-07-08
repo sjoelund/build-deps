@@ -94,12 +94,12 @@ images:
   # Alpine has no OpenModelica apk repo; apk/Dockerfile installs the build
   # dependencies directly. VERSION selects the Alpine release.
   - os: alpine
-    version: "3.22"
+    version: "3.24"
     context: apk
     dockerfile: apk/Dockerfile
     target: full
     build_args:
-      VERSION: "3.22"
+      VERSION: "3.24"
     addons:
       - omsimulator
 
