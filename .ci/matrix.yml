@@ -103,21 +103,53 @@ images:
     addons:
       - omsimulator
 
+  # RPM-based distros — the enterprise family (AlmaLinux, RHEL) and
+  # Fedora — share rpm/Dockerfile; only DISTRO and VERSION differ. The base image
+  # is the `full` stage. EPEL/CRB, Qt5/Qt6, autoconf 2.7x, gcc-toolset and the
+  # Fedora-only deps are selected from ID/PLATFORM_ID at build time — see
+  # rpm/Dockerfile.
+  - os: almalinux
+    version: "10"
+    context: rpm
+    dockerfile: rpm/Dockerfile
+    target: full
+    build_args:
+      DISTRO: almalinux
+      VERSION: "10"
+    addons: []
+
+  - os: almalinux
+    version: "9"
+    context: rpm
+    dockerfile: rpm/Dockerfile
+    target: full
+    build_args:
+      DISTRO: almalinux
+      VERSION: "9"
+    addons: []
+
+  - os: fedora
+    version: "44"
+    context: rpm
+    dockerfile: rpm/Dockerfile
+    target: full
+    build_args:
+      DISTRO: fedora
+      VERSION: "44"
+    addons: []
+
+  - os: fedora
+    version: "43"
+    context: rpm
+    dockerfile: rpm/Dockerfile
+    target: full
+    build_args:
+      DISTRO: fedora
+      VERSION: "43"
+    addons: []
+
   # Placeholders — not implemented yet. Uncomment and flesh out once the
   # corresponding Dockerfile is real, so CI starts building them.
-  #
-  # RPM-based distros (Fedora, AlmaLinux, Rocky Linux, RHEL) will share
-  # rpm/Dockerfile — see that file for details.
-  #
-  # - os: fedora
-  #   version: "42"
-  #   context: rpm
-  #   dockerfile: rpm/Dockerfile
-  #   target: full
-  #   build_args:
-  #     DISTRO: fedora
-  #     VERSION: "42"
-  #   addons: []
   #
   # - os: arch
   #   version: "rolling"

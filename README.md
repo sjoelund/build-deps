@@ -24,7 +24,7 @@ main
 ├── apk/
 │   └── Dockerfile          # multi-stage: Alpine Linux + add-ons
 ├── rpm/
-│   └── Dockerfile          # planned: Fedora, AlmaLinux, Rocky Linux, RHEL
+│   └── Dockerfile          # multi-stage: AlmaLinux, RHEL, Fedora
 ├── pacman/
 │   └── Dockerfile          # placeholder (not implemented yet)
 └── .ci/
@@ -73,16 +73,18 @@ OpenModelica release needs a frozen environment it pins the **immutable** tag.
 
 ### Currently provided images
 
-| OS / version            | Base tag       | Add-ons                           | Dockerfile          | Status      |
-| ----------------------- | -------------- | --------------------------------- | ------------------- | ----------- |
-| Ubuntu 26.04 (Resolute) | `ubuntu-26.04` | `rust`, `debug`, `omsimulator`    | `apt/Dockerfile`    | implemented |
-| Ubuntu 24.04 (Noble)    | `ubuntu-24.04` | `cmake-4`, `debug`, `omsimulator` | `apt/Dockerfile`    | implemented |
-| Ubuntu 22.04 (Jammy)    | `ubuntu-22.04` | `debug`, `omsimulator`            | `apt/Dockerfile`    | implemented |
-| Debian 13 (Trixie)      | `debian-13`    | `cmake-4`, `debug`                | `apt/Dockerfile`    | implemented |
-| Debian 12 (Bookworm)    | `debian-12`    | `cmake-4`, `debug`                | `apt/Dockerfile`    | implemented |
-| Alpine 3.24             | `alpine-3.24`  | `omsimulator`                     | `apk/Dockerfile`    | implemented |
-| Fedora, AlmaLinux, RHEL | `<os>-<ver>`   | –                                 | `rpm/Dockerfile`    | planned     |
-| Arch Linux (rolling)    | `arch-rolling` | –                                 | `pacman/Dockerfile` | placeholder |
+| OS / version            | Base tag        | Add-ons                           | Dockerfile       |
+| ----------------------- | --------------- | --------------------------------- | ---------------- |
+| Ubuntu 26.04 (Resolute) | `ubuntu-26.04`  | `rust`, `debug`, `omsimulator`    | `apt/Dockerfile` |
+| Ubuntu 24.04 (Noble)    | `ubuntu-24.04`  | `cmake-4`, `debug`, `omsimulator` | `apt/Dockerfile` |
+| Ubuntu 22.04 (Jammy)    | `ubuntu-22.04`  | `debug`, `omsimulator`            | `apt/Dockerfile` |
+| Debian 13 (Trixie)      | `debian-13`     | `cmake-4`, `debug`                | `apt/Dockerfile` |
+| Debian 12 (Bookworm)    | `debian-12`     | `cmake-4`, `debug`                | `apt/Dockerfile` |
+| Alpine 3.24             | `alpine-3.24`   | `omsimulator`                     | `apk/Dockerfile` |
+| AlmaLinux 10            | `almalinux-10`  | –                                 | `rpm/Dockerfile` |
+| AlmaLinux 9             | `almalinux-9`   | –                                 | `rpm/Dockerfile` |
+| Fedora 44               | `fedora-44`     | –                                 | `rpm/Dockerfile` |
+| Fedora 43               | `fedora-43`     | –                                 | `rpm/Dockerfile` |
 
 ## Build locally
 
@@ -135,6 +137,27 @@ docker build --pull \
   apk
 ```
 
+**Enterprise Linux** (AlmaLinux, RHEL) and **Fedora** share
+[rpm/Dockerfile][rpm-dockerfile]. `DISTRO` and `VERSION` select the base image;
+EPEL/CRB, Qt5/Qt6, autoconf 2.7x and gcc-toolset are picked from `ID`/`PLATFORM_ID`
+at build time:
+
+```bash
+# AlmaLinux
+docker build --pull --no-cache \
+  --target full \
+  --build-arg DISTRO=almalinux --build-arg VERSION=10 \
+  --tag build-deps:almalinux-10 \
+  rpm
+
+# Fedora
+docker build --pull --no-cache \
+  --target full \
+  --build-arg DISTRO=fedora --build-arg VERSION=44 \
+  --tag build-deps:fedora-44 \
+  rpm
+```
+
 > The values to pass (`context`, `--file`, `--target`, `--build-arg`) for any
 > image are exactly its fields in [.ci/matrix.yml][matrix-yml].
 
@@ -174,6 +197,7 @@ See [LICENSE.md][license-md].
 [matrix-yml]: ./.ci/matrix.yml
 [apt-dockerfile]: ./apt/Dockerfile
 [apk-dockerfile]: ./apk/Dockerfile
+[rpm-dockerfile]: ./rpm/Dockerfile
 [workflow-build-file]: ./.github/workflows/build.yml
 [releasing-md]: ./RELEASING.md
 [build-scripts]: https://github.com/OpenModelica/OpenModelicaBuildScripts
