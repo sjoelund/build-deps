@@ -5,6 +5,7 @@ name: Build, Release & Publish
 #
 #   discover ─▶ build (all images, no push)
 #                 └─▶ release (tag only) ─▶ publish-ghcr + publish-nexus
+#                                             └─▶ cleanup (GHCR, no dry-run)
 #
 # Triggers:
 #   push main         Publishes every image with the moving tag (<os>-<version>).
@@ -247,6 +248,17 @@ jobs:
               --certificate-oidc-issuer="${CERT_ISSUER}" \
               "${REGISTRY}:${t}"
           done
+
+  # Prune superseded digests and orphaned signatures right after publishing,
+  # so re-pushed moving tags don't pile up as untagged versions on GHCR.
+  cleanup:
+    name: Cleanup container registry
+    needs: publish-ghcr
+    permissions:
+      packages: write
+    uses: ./.github/workflows/cleanup.yml
+    with:
+      dry-run: false
 
   publish-nexus:
     name: Publish ${{ matrix.image.tag }} to Nexus

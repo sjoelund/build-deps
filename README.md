@@ -184,13 +184,15 @@ discover ─▶ build (all images, no push)
   of a released image points at the same digest, so it verifies with the same
   signature.
 
-A second, manually triggered workflow,
-[cleanup.yml](./.github/workflows/cleanup.yml), deletes stale versions of the
-GHCR package: untagged digests left behind by re-pushed moving tags and
-orphaned cosign `sha256-*` signature tags whose image is gone. It keeps all
-tagged images, anything still referenced by them, and signatures of existing
-images. It defaults to a dry run — inspect the log, then re-run it with
-`dry-run` unchecked.
+A second workflow, [cleanup.yml](./.github/workflows/cleanup.yml), deletes
+stale versions of the GHCR package: untagged digests left behind by re-pushed
+moving tags and orphaned cosign `sha256-*` signature tags whose image is gone.
+It keeps all tagged images, anything still referenced by them, and signatures
+of existing images. It runs automatically after every successful GHCR publish
+and can also be triggered manually, where it defaults to a dry run — inspect
+the log, then re-run it with `dry-run` unchecked. Note that superseded digests
+are pruned right after each publish, so pulling a moving tag's previous image
+by digest is not supported.
 
 ## Releasing a new image version
 

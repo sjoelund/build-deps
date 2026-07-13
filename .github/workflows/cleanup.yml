@@ -1,6 +1,8 @@
 name: Cleanup container registry
 
-# Manually triggered cleanup of the ghcr.io/openmodelica/build-deps package.
+# Cleanup of the ghcr.io/openmodelica/build-deps package. Runs automatically
+# at the end of every publish (called from build.yml) and can be triggered
+# manually via workflow_dispatch.
 #
 # Deletes:
 #   - untagged versions that nothing references (stale digests left behind
@@ -16,8 +18,8 @@ name: Cleanup container registry
 #   - cosign signatures whose subject image still exists, so signed release
 #     tags remain verifiable
 #
-# Run with dry-run: true (the default) first and check the log before running
-# it for real.
+# When triggering manually, run with dry-run: true (the default) first and
+# check the log before running it for real.
 
 on:
   workflow_dispatch:
@@ -26,6 +28,13 @@ on:
         description: 'Only log what would be deleted, do not delete anything'
         type: boolean
         default: true
+  workflow_call:
+    inputs:
+      dry-run:
+        description: 'Only log what would be deleted, do not delete anything'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   packages: write
