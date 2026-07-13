@@ -103,6 +103,11 @@ Use the **workflow_dispatch** trigger on
 - **Pass a single image tag** (e.g. `ubuntu-24.04-2.1.0`) — re-publishes
   only that one image with its moving and immutable tags.
 
+The **sign** checkbox (default: on) controls whether the re-published
+immutable tags are cosign-signed on GHCR. It only applies when immutable tags
+are pushed (a `v<semver>` or single-image tag input); moving-tag-only
+re-publishes are never signed.
+
 ## Adding a brand-new image
 
 1. For a **new OS**, create the single multi-stage `<os>/Dockerfile` (see

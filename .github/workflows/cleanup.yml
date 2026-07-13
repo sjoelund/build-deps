@@ -1,0 +1,48 @@
+name: Cleanup container registry
+
+# Manually triggered cleanup of the ghcr.io/openmodelica/build-deps package.
+#
+# Deletes:
+#   - untagged versions that nothing references (stale digests left behind
+#     every time a moving tag like `ubuntu-24.04` is re-pushed)
+#   - ghost / partial multi-arch images whose platform manifests are gone
+#   - orphaned referrers (e.g. cosign `sha256-*` signature tags whose subject
+#     image no longer exists)
+#
+# Keeps:
+#   - every tagged image
+#   - untagged manifests still referenced by a tagged image (multi-arch
+#     children, provenance/attestation manifests)
+#   - cosign signatures whose subject image still exists, so signed release
+#     tags remain verifiable
+#
+# Run with dry-run: true (the default) first and check the log before running
+# it for real.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Only log what would be deleted, do not delete anything'
+        type: boolean
+        default: true
+
+permissions:
+  packages: write
+
+jobs:
+  cleanup:
+    name: Delete untagged and dangling versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Cleanup build-deps package
+        uses: dataaxiom/ghcr-cleanup-action@d52806a0dc70b430571a37da1fde39733ffd640f # v1.2.2
+        with:
+          package: build-deps
+          delete-untagged: true
+          delete-ghost-images: true
+          delete-partial-images: true
+          delete-orphaned-images: true
+          validate: true
+          dry-run: ${{ inputs.dry-run }}

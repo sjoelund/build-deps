@@ -175,10 +175,22 @@ discover ─▶ build (all images, no push)
 - **build** — on every push/PR to `main` (and as the gate before release),
   builds every base + add-on declared in `.ci/matrix.yml` (no push).
 - **release** — on an repo-wide release tag, creates/updates the GitHub Release.
-- **publish-ghcr / publish-nexus** — build and push (and on GHCR **sign**) the
-  images to GHCR and Nexus. Moving tags (`<os>-<version>`) are updated on every
+- **publish-ghcr / publish-nexus** — build and push the images to GHCR and
+  Nexus. Moving tags (`<os>-<version>`) are updated on every
   push to `main`, the weekly schedule, and `workflow_dispatch`. Immutable tags
   (`<os>-<version>-<semver>`) are pushed on a release tag, and can also be republished via `workflow_dispatch` when a global `v<semver>` is supplied.
+  On GHCR the immutable tags are **cosign-signed** — only on releases (and
+  optionally on `workflow_dispatch` re-publishes of a release); the moving tag
+  of a released image points at the same digest, so it verifies with the same
+  signature.
+
+A second, manually triggered workflow,
+[cleanup.yml](./.github/workflows/cleanup.yml), deletes stale versions of the
+GHCR package: untagged digests left behind by re-pushed moving tags and
+orphaned cosign `sha256-*` signature tags whose image is gone. It keeps all
+tagged images, anything still referenced by them, and signatures of existing
+images. It defaults to a dry run — inspect the log, then re-run it with
+`dry-run` unchecked.
 
 ## Releasing a new image version
 

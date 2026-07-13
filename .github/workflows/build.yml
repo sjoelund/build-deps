@@ -15,6 +15,11 @@ name: Build, Release & Publish
 #                     all moving tags; pass a global tag (e.g. v2.1.0) to rebuild
 #                     all images with immutable tags; pass a single image tag
 #                     (e.g. ubuntu-24.04-2.1.0) to rebuild just that image.
+#
+# Cosign signing on GHCR happens only for releases (immutable tags): on a
+# v-tag push, and on workflow_dispatch re-publishes of a release unless the
+# `sign` input is unchecked. Moving-tag publishes (main, schedule) never sign,
+# keeping the number of sha256-* signature tags on GHCR to a minimum.
 
 on:
   schedule:
@@ -33,6 +38,11 @@ on:
         description: 'Optional: version to (re)publish. Empty = rebuild all moving tags. Global tag (e.g. v2.1.0) = all images with immutable tags. Single image tag (e.g. ubuntu-24.04-2.1.0) = one image with immutable tag.'
         required: false
         default: ''
+      sign:
+        description: 'Cosign-sign the immutable tags on GHCR when re-publishing a release. Moving-tag-only publishes are never signed.'
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   contents: read
@@ -46,7 +56,7 @@ jobs:
       publish_matrix: ${{ steps.publish_tags.outputs.matrix }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install dependencies
         run: pip install -r .ci/requirements.txt
@@ -102,18 +112,18 @@ jobs:
         image: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       # The Dockerfile tend to be huge, free up some space on the GitHub runners
       - name: Free up disk space
-        uses: endersonmenezes/free-disk-space@v3.2.2
+        uses: endersonmenezes/free-disk-space@7901478139cff6e9d44df5972fd8ab8fcade4db1 # v3.2.2
         with:
           remove_android: "true"
           remove_dotnet: "true"
           remove_haskell: "true"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Build base image and add-ons
         env:
@@ -134,7 +144,7 @@ jobs:
       contents: write
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Create or update release
         env:
@@ -178,52 +188,57 @@ jobs:
       TAG: ${{ matrix.image.tag }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       # The Dockerfile tend to be huge, free up some space on the GitHub runners
       - name: Free up disk space
-        uses: endersonmenezes/free-disk-space@v3.2.2
+        uses: endersonmenezes/free-disk-space@7901478139cff6e9d44df5972fd8ab8fcade4db1 # v3.2.2
         with:
           remove_android: "true"
           remove_dotnet: "true"
           remove_haskell: "true"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Install dependencies
         run: pip install -r .ci/requirements.txt
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v4.1.2
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4.4.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Sign only releases: a v-tag push, or a workflow_dispatch re-publish
+      # unless its `sign` input is unchecked. Publishes without immutable
+      # tags (schedule, push to main, dispatch with an empty tag input)
+      # are never signed — publish.sh only signs immutable tags.
       - name: Build, push and sign image (base + add-ons)
         env:
-          SIGN: "true"
+          SIGN: ${{ (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.sign)) && 'true' || 'false' }}
         run: ./.ci/publish.sh
 
       - name: Verify signatures
+        if: ${{ startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.sign) }}
         run: |
           set -euo pipefail
           eval "$(python .ci/matrix.py image "${TAG}")"
+          if [[ -z "${semver}" ]]; then
+            echo "Moving-tag-only publish — nothing was signed, skipping verification."
+            exit 0
+          fi
           CERT_ID="https://github.com/${GITHUB_REPOSITORY}/.github/workflows/build.yml@${GITHUB_REF}"
           CERT_ISSUER="https://token.actions.githubusercontent.com"
-          tags=("${base_tag}")
-          if [[ -n "${semver}" ]]; then
-            tags+=("${base_tag}-${semver}")
-          fi
+          # Signatures are per digest; verifying the immutable tags also
+          # covers the moving tags, which point at the same digests.
+          tags=("${base_tag}-${semver}")
           for addon in ${addons}; do
-            tags+=("${base_tag}-${addon}")
-            if [[ -n "${semver}" ]]; then
-              tags+=("${base_tag}-${addon}-${semver}")
-            fi
+            tags+=("${base_tag}-${addon}-${semver}")
           done
           for t in "${tags[@]}"; do
             echo "Verifying ${REGISTRY}:${t}"
@@ -254,24 +269,24 @@ jobs:
       TAG: ${{ matrix.image.tag }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       # The Dockerfile tend to be huge, free up some space on the GitHub runners
       - name: Free up disk space
-        uses: endersonmenezes/free-disk-space@v3.2.2
+        uses: endersonmenezes/free-disk-space@7901478139cff6e9d44df5972fd8ab8fcade4db1 # v3.2.2
         with:
           remove_android: "true"
           remove_dotnet: "true"
           remove_haskell: "true"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Install dependencies
         run: pip install -r .ci/requirements.txt
 
       - name: Login to Nexus Docker registry
-        uses: docker/login-action@v4.4.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: docker.openmodelica.org
           username: ${{ secrets.NEXUS_OPENMODELICABOT_USER }}

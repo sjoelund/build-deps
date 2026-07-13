@@ -11,7 +11,10 @@
 # Required environment variables:
 #   REGISTRY  Image repository, e.g. ghcr.io/openmodelica/build-deps
 #   TAG       Base tag (e.g. ubuntu-24.04) or release tag (e.g. ubuntu-24.04-2.1.0)
-#   SIGN      "true" to cosign-sign every pushed tag (keyless OIDC), else "false"
+#   SIGN      "true" to cosign-sign the pushed immutable tags (keyless OIDC),
+#             else "false". Only immutable tags are signed: the moving tag
+#             points at the same digest, so one signature per image covers
+#             both, and moving-only publishes (no semver) sign nothing.
 set -euo pipefail
 
 : "${REGISTRY:?REGISTRY is required}"
@@ -25,6 +28,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 eval "$(python3 "${SCRIPT_DIR}/matrix.py" image "${TAG}")"
 
 PUSHED_TAGS=()
+IMMUTABLE_TAGS=()
 
 build_and_push() {
   # $1 = moving tag, $2 = immutable tag (empty → skip), remaining args go to `docker buildx`.
@@ -35,8 +39,12 @@ build_and_push() {
     tag_args+=(--tag "${REGISTRY}:${immutable}")
   fi
   echo "::group::Building ${moving}"
+  # --provenance=false: without it buildx wraps every image in an OCI index
+  # with an extra attestation manifest, which piles up as untagged versions
+  # on GHCR on every push.
   docker buildx build \
     --pull \
+    --provenance=false \
     --file "${dockerfile}" \
     "${tag_args[@]}" \
     --cache-from "type=gha,scope=${moving}" \
@@ -47,6 +55,7 @@ build_and_push() {
   PUSHED_TAGS+=("${REGISTRY}:${moving}")
   if [[ -n "${immutable}" ]]; then
     PUSHED_TAGS+=("${REGISTRY}:${immutable}")
+    IMMUTABLE_TAGS+=("${REGISTRY}:${immutable}")
   fi
 }
 
@@ -70,9 +79,10 @@ for addon in ${addons}; do
     "${common_args[@]}" --target "${addon}"
 done
 
-# 3. Optionally sign every pushed tag (GHCR / cosign keyless).
-if [ "${SIGN}" = "true" ]; then
-  for image in "${PUSHED_TAGS[@]}"; do
+# 3. Optionally sign the immutable tags (GHCR / cosign keyless). Signing is
+#    per digest, so the moving tag of the same image verifies too.
+if [ "${SIGN}" = "true" ] && [ "${#IMMUTABLE_TAGS[@]}" -gt 0 ]; then
+  for image in "${IMMUTABLE_TAGS[@]}"; do
     echo "Signing ${image}"
     COSIGN_EXPERIMENTAL=1 cosign sign --yes --registry-referrers-mode=oci-1-1 "${image}"
   done
