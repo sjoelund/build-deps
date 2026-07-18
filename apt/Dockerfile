@@ -127,7 +127,7 @@ RUN curl https://sh.rustup.rs | bash -s -- -y \
       --target wasm32-wasip1 && \
     . "$CARGO_HOME/env" && \
     which cargo && cargo --version && \
-    rustup component add rustc-codegen-cranelift-preview clippy rustfmt && \
+    rustup component add rustc-codegen-cranelift-preview clippy rustfmt rust-src && \
     cargo install wasm-bindgen-cli --version "${WASM_BINDGEN_VERSION}" && \
     cargo install sccache --locked && \
     cargo install cargo-nextest --locked && \
