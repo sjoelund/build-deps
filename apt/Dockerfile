@@ -332,6 +332,9 @@ COPY --from=rustdeps /opt/Qt /opt/Qt
 COPY --from=rustdeps /opt/rust /opt/rust
 COPY --from=rustdeps /opt/cargo-xwin /opt/cargo-xwin
 
+# Not recursive - we don't want to duplicate the layer
+RUN chmod ugo+rwx /opt/cargo-xwin
+
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update \
   && apt-get install -qy \
     lld \
