@@ -124,6 +124,7 @@ RUN curl https://sh.rustup.rs | bash -s -- -y \
       --target aarch64-unknown-linux-gnu \
       --target x86_64-pc-windows-msvc \
       --target aarch64-pc-windows-msvc \
+      --target x86_64-apple-darwin \
       --target aarch64-apple-darwin \
       --target wasm32-unknown-unknown \
       --target wasm32-wasip1 && \
@@ -147,7 +148,7 @@ RUN curl https://sh.rustup.rs | bash -s -- -y \
            "$CARGO_HOME/.package-cache" \
            "$HOME/.rustup/downloads" "$HOME/.rustup/tmp" \
            "${CARGO_TARGET_DIR:-/nonexistent}" && \
-    mkdir -p "$CARGO_HOME/registry" && chmod ugo+rwx -R /opt/rust
+    mkdir -p "$CARGO_HOME/registry" && chmod ugo+rwx -R /opt/rust /opt/cargo-xwin
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -322,11 +323,14 @@ ENV EMSDK=/opt/emsdk \
   RUSTUP_HOME=/opt/rust/rustup \
   CARGO_HOME=/opt/rust/cargo \
   XWIN_CACHE_DIR=/opt/cargo-xwin \
+  CARGO_ZIGBUILD_CACHE_DIR=/opt/cargo-zigbuild \
+  ZIG_GLOBAL_CACHE_DIR=/opt/zig-cache \
   PATH=/opt/emsdk:/opt/emsdk/upstream/emscripten:/opt/Qt/6.10.2/wasm_singlethread/bin:/opt/rust/cargo/bin:$PATH
 
 COPY --from=rustdeps /opt/emsdk /opt/emsdk
 COPY --from=rustdeps /opt/Qt /opt/Qt
 COPY --from=rustdeps /opt/rust /opt/rust
+COPY --from=rustdeps /opt/cargo-xwin /opt/cargo-xwin
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update \
   && apt-get install -qy \
@@ -339,6 +343,16 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update \
     llvm \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# Prime zig's libc/compiler_rt cache for the FMU-loader cross targets.
+RUN mkdir -p /tmp/zigprime/src && cd /tmp/zigprime \
+  && printf '[package]\nname = "zigprime"\nversion = "0.0.0"\nedition = "2021"\n[lib]\ncrate-type = ["cdylib"]\n' > Cargo.toml \
+  && echo '#[no_mangle] pub extern "C" fn zigprime() {}' > src/lib.rs \
+  && for t in aarch64-unknown-linux-gnu x86_64-apple-darwin aarch64-apple-darwin; do \
+       cargo zigbuild --release --target "$t" || exit 1; \
+     done \
+  && cd / && rm -rf /tmp/zigprime \
+  && chmod ugo+rwx -R /opt/zig-cache /opt/cargo-zigbuild
 
 # ── OMSimulator add-on: full + X11 dev libs OMSimulator's GUI links against ───
 # Mirrors OMSimulator/.CI/cache/Dockerfile. The AddressSanitizer runtime is not
