@@ -121,8 +121,10 @@ ENV RUSTUP_HOME=/opt/rust/rustup \
 RUN curl https://sh.rustup.rs | bash -s -- -y \
       --profile minimal \
       --default-toolchain "${RUST_NIGHTLY}" \
+      --target aarch64-unknown-linux-gnu \
       --target x86_64-pc-windows-msvc \
       --target aarch64-pc-windows-msvc \
+      --target aarch64-apple-darwin \
       --target wasm32-unknown-unknown \
       --target wasm32-wasip1 && \
     . "$CARGO_HOME/env" && \
@@ -149,7 +151,7 @@ RUN curl https://sh.rustup.rs | bash -s -- -y \
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        git python3 python3-pip python3-venv ca-certificates xz-utils flang llvm && \
+        git python3 python3-pip python3-venv ca-certificates xz-utils && \
     # --- Emscripten 4.0.7 (required by Qt 6.10.x; Ubuntu has 3.1.69) ---
     git clone --depth 1 https://github.com/emscripten-core/emsdk.git /opt/emsdk; \
     cd /opt/emsdk && \
@@ -332,6 +334,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update \
     libclang-rt-dev-wasm32 \
     wine \
     mold \
+    zig \
+    llvm \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
